@@ -48,3 +48,12 @@ Object.defineProperty(exports, "Transformer", {
     return _vinylTransformer.Transformer;
   }
 });
+
+var _piper = require("./piper");
+
+Object.defineProperty(exports, "piper", {
+  enumerable: true,
+  get: function get() {
+    return _piper.piper;
+  }
+});
