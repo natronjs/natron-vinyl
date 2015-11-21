@@ -1,4 +1,4 @@
-/*
- * natron-vinyl
+/**
+ * @module natron-vinyl
  */
 module.exports = require("./dist/cjs");

@@ -1,0 +1,17 @@
+#
+# .travis.yml
+#
+
+language: "node_js"
+
+node_js:
+  - "stable"
+  - "4.2" # Argon
+  - "0.12"
+
+install:
+  - "npm install"
+  - "npm --prefix build install"
+
+script:
+  - "build/node_modules/.bin/eslint src"

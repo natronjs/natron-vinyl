@@ -1,7 +1,10 @@
-/*
- * natron-vinyl
+/**
+ * @module natron-vinyl
  */
-export {default as File, isVinyl} from "vinyl";
+// export {default as File, isVinyl} from "vinyl";
+import File from "vinyl";
+let {isVinyl} = File;
+export {File, isVinyl};
 export {src, dest, symlink} from "vinyl-fs";
-export {Transformer} from "vinyl-transformer";
-export {piper} from "./piper";
+export {Transformer, transformer} from "vinyl-transformer";
+export {promisify, merge, awaitAll, fromPromise} from "./helper";
