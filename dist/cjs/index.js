@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.fromPromise = exports.awaitAll = exports.merge = exports.promisify = exports.transformer = exports.Transformer = exports.symlink = exports.dest = exports.src = exports.isVinyl = exports.File = undefined;
+exports.fromPromise = exports.awaitAll = exports.merge = exports.transformer = exports.Transformer = exports.symlink = exports.dest = exports.src = exports.isVinyl = exports.File = undefined;
 
 var _vinylFs = require("vinyl-fs");
 
@@ -43,12 +43,6 @@ Object.defineProperty(exports, "transformer", {
 
 var _helper = require("./helper");
 
-Object.defineProperty(exports, "promisify", {
-  enumerable: true,
-  get: function get() {
-    return _helper.promisify;
-  }
-});
 Object.defineProperty(exports, "merge", {
   enumerable: true,
   get: function get() {

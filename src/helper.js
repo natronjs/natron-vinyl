@@ -3,10 +3,7 @@
  */
 import {Stream, Readable, PassThrough} from "readable-stream";
 
-export function promisify(stream: Stream): Promise {
-  if (!(stream instanceof Stream)) {
-    throw new TypeError(`${stream} is not a Stream`);
-  }
+function promisifyStream(stream: Stream): Promise {
   return new Promise((resolve, reject) => {
     stream.on(stream._write ? "finish": "end", () => resolve({stream}));
     stream.on("error", (err) => reject(err));
@@ -19,7 +16,7 @@ export function merge(streams: Array<Stream>, options?: Object): PassThrough {
   if (options && options.preserveOrder) {
     promise = Promise.resolve();
     for (let stream of streams) {
-      let p = promisify(stream);
+      let p = promisifyStream(stream);
       promise = promise.then(() => {
         stream.pipe(through, {end: false});
         return p;
@@ -28,7 +25,7 @@ export function merge(streams: Array<Stream>, options?: Object): PassThrough {
   } else {
     let promises = [];
     for (let stream of streams) {
-      let p = promisify(stream);
+      let p = promisifyStream(stream);
       stream.pipe(through, {end: false});
       promises.push(p);
     }
@@ -44,26 +41,26 @@ export function merge(streams: Array<Stream>, options?: Object): PassThrough {
 export function awaitAll(streams: Array<Stream>): Promise {
   let promises = [];
   for (let stream of streams) {
-    promises.push(promisify(stream));
+    promises.push(promisifyStream(stream));
   }
   return Promise.all(promises);
 }
 
 export function fromPromise(promise: Promise): Readable {
+  let promise_ = promise;
   return new class extends Readable {
     constructor() {
       super({objectMode: true});
-      (promise
-        .then((value) => {
-          this.push(value);
-          this.push(null);
-        })
-        .catch((err) => {
-          this.emit("error", err);
-          this.push(null);
-        })
-      );
     }
-    _read(): void {}
+    _read(): void {
+      if (!promise_) {
+        return this.push(null);
+      }
+      (promise_ && promise_
+        .then((val) => this.push(val))
+        .catch((err) => this.emit("error", err))
+      );
+      promise_ = null;
+    }
   };
 }

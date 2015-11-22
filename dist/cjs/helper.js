@@ -5,7 +5,6 @@ var _createClass = (function () { function defineProperties(target, props) { for
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.promisify = promisify;
 exports.merge = merge;
 exports.awaitAll = awaitAll;
 exports.fromPromise = fromPromise;
@@ -20,10 +19,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 * @module natron-vinyl
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 */
 
-function promisify(stream) {
-  if (!(stream instanceof _readableStream.Stream)) {
-    throw new TypeError(stream + " is not a Stream");
-  }
+function promisifyStream(stream) {
   return new Promise(function (resolve, reject) {
     stream.on(stream._write ? "finish" : "end", function () {
       return resolve({ stream: stream });
@@ -47,7 +43,7 @@ function merge(streams, options) {
       var _loop = function _loop() {
         var stream = _step.value;
 
-        var p = promisify(stream);
+        var p = promisifyStream(stream);
         promise = promise.then(function () {
           stream.pipe(through, { end: false });
           return p;
@@ -81,7 +77,7 @@ function merge(streams, options) {
       for (var _iterator2 = streams[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
         var _stream = _step2.value;
 
-        var _p = promisify(_stream);
+        var _p = promisifyStream(_stream);
         _stream.pipe(through, { end: false });
         promises.push(_p);
       }
@@ -120,7 +116,7 @@ function awaitAll(streams) {
     for (var _iterator3 = streams[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
       var _stream2 = _step3.value;
 
-      promises.push(promisify(_stream2));
+      promises.push(promisifyStream(_stream2));
     }
   } catch (err) {
     _didIteratorError3 = true;
@@ -141,27 +137,31 @@ function awaitAll(streams) {
 }
 
 function fromPromise(promise) {
+  var promise_ = promise;
   return new ((function (_Readable) {
     _inherits(_class, _Readable);
 
     function _class() {
       _classCallCheck(this, _class);
 
-      var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(_class).call(this, { objectMode: true }));
-
-      promise.then(function (value) {
-        _this.push(value);
-        _this.push(null);
-      }).catch(function (err) {
-        _this.emit("error", err);
-        _this.push(null);
-      });
-      return _this;
+      return _possibleConstructorReturn(this, Object.getPrototypeOf(_class).call(this, { objectMode: true }));
     }
 
     _createClass(_class, [{
       key: "_read",
-      value: function _read() {}
+      value: function _read() {
+        var _this2 = this;
+
+        if (!promise_) {
+          return this.push(null);
+        }
+        promise_ && promise_.then(function (val) {
+          return _this2.push(val);
+        }).catch(function (err) {
+          return _this2.emit("error", err);
+        });
+        promise_ = null;
+      }
     }]);
 
     return _class;
